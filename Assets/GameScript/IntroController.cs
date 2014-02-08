@@ -36,12 +36,12 @@ public class IntroController : MonoBehaviour
 
         if (skipping)
         {
-            for (int i = 0; i <= 6; i++)
+            /* for (int i = 0; i <= 6; i++)
             {
                 GameObject go = GameObject.Find("Text" + (i + 1));
                 TweenPosition pos = go.GetComponent<TweenPosition>();
                 //pos.enabled = false;
-            }
+            } */
             IntroFinished();
         }
 
@@ -71,6 +71,7 @@ public class IntroController : MonoBehaviour
     void IntroFadedFinished()
     {
         Debug.Log("Intro faded");
+        GameObject.Find("GameRunner").GetComponent<GameRunner>().StartGame();
     }
 
     void IntroFinished()
@@ -108,6 +109,8 @@ public class IntroController : MonoBehaviour
             pos.ResetToBeginning();
             pos.PlayForward();
         }
+
+        GameObject.Find("Hider").GetComponent<TweenColor>().enabled = true;
 
         finished = true;
 
