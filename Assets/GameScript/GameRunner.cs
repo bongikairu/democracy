@@ -15,7 +15,10 @@ public class GameRunner : MonoBehaviour
 
     public event DayChangeHandler DayChanged;
 
-    public float DayProgress = 5f / 30f;    // new day in 5/30 secs
+    [SerializeField]
+    private float _DayProgress = 7.5f / 30f;    // new day in 5/30 secs
+
+    public float DayProgress { get { return _DayProgress; } }
     public float DayProgressTimer = 0f;
 
     public int MaxDay = 365 * 4 + 1;
@@ -40,6 +43,7 @@ public class GameRunner : MonoBehaviour
     public void StartGame()
     {
         Running = true;
+        //Camera.main.GetComponent<AudioSource>().Play();
     }
 
     // Update is called once per frame
