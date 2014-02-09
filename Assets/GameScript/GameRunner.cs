@@ -25,7 +25,7 @@ public class GameRunner : MonoBehaviour
     {
         UpdateDateLabel();
         DayChanged += UpdateDateLabel;
-        if (!GameObject.Find("Intro").activeInHierarchy)
+        if (!GameObject.Find("Intro"))
         {
             StartGame();
         }
