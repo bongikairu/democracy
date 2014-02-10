@@ -6,14 +6,14 @@ public class NotiScript : MonoBehaviour
 
     private NotiNode head;
 
-    private float test;
+    private float test = 0f;
 
     // Use this for initialization
     void Start()
     {
-        AddNotis("test");
-        AddNotis("test2");
-        AddNotis("test3");
+        //AddNotis("test");
+        //AddNotis("test2");
+        //AddNotis("test3"); 
     }
 
     // Update is called once per frame
@@ -21,11 +21,11 @@ public class NotiScript : MonoBehaviour
     {
         if (head != null) head = head.Progress();
 
-        test += Time.fixedDeltaTime;
+        //test += Time.fixedDeltaTime;
         if (test > Random.Range(0.2f, 3f))
         {
             test = 0f;
-            AddNotis("test " + Random.Range(0, 65535));
+            //AddNotis("test " + Random.Range(0, 65535));
         }
     }
 
@@ -34,10 +34,10 @@ public class NotiScript : MonoBehaviour
         throw new System.NotImplementedException();
     }
 
-    void AddNotis(string txt)
+    public void AddNotis(string txt,Color c)
     {
 
-        head = NotiNode.CreateNode(head, txt);
+        head = NotiNode.CreateNode(head, txt,c);
 
     }
 

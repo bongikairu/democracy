@@ -86,7 +86,7 @@ class NotiNode
 
     private static int notiCount = 1;
 
-    internal static NotiNode CreateNode(NotiNode rhead,string txt)
+    internal static NotiNode CreateNode(NotiNode rhead,string txt,Color c)
     {
         NotiNode head = rhead;
         NotiNode n = new NotiNode();
@@ -106,7 +106,7 @@ class NotiNode
         n.label.text = txt;
         n.label.trueTypeFont = GameObject.Find("SwissMoneyValue").GetComponent<UILabel>().trueTypeFont;
         n.label.fontSize = 22;
-        n.label.color = Color.black;
+        n.label.color = c;
         n.label.pivot = UIWidget.Pivot.Right;
         n.label.transform.localPosition = new Vector3(620, 320, 0);
 
@@ -141,6 +141,7 @@ class NotiNode
 
     void DisappearFinished()
     {
+        this.state = State.Dead;
         GameObject.Destroy(label.gameObject);
     }
 }
