@@ -21,6 +21,7 @@
 # All platforms
 Library
 Temp
+obj/Debug
 *.csproj
 *.pidb
 *.unityproj
