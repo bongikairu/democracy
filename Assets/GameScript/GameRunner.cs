@@ -81,7 +81,7 @@ public class GameRunner : MonoBehaviour
     void Start()
     {
         grav = Physics.gravity;
-        Physics.gravity = Vector3.zero;
+        //Physics.gravity = Vector3.zero;
         GameObject.Find("Intro").transform.localPosition -= new Vector3(0, 530.6501f + 189.6017f, 0);
 
         if (ThisIsDebug)
@@ -125,10 +125,15 @@ public class GameRunner : MonoBehaviour
         else label.color = ColorPos;
     }
 
+    public void PreStartGame()
+    {
+        Physics.gravity = grav;
+    }
+
     public void StartGame()
     {
 
-        Physics.gravity = grav;
+        PreStartGame();
 
         Running = true;
         //Camera.main.GetComponent<AudioSource>().Play();
@@ -250,17 +255,17 @@ public class GameRunner : MonoBehaviour
 
         Vector3 midPoint = new Vector3(51.0728f, 0.6888365f, -2.616897f);
 
-        int numArmed = 4;
-        int numLower = 15;
-        int numMiddle = 7;
-        int numHigh = 4;
+        int numArmed = 6;
+        int numLower = 20;
+        int numMiddle = 10;
+        int numHigh = 5;
         int numFamily = 1;
 
         for (int i = 0; i < numArmed + numLower + numMiddle + numHigh + numFamily; i++)
         {
             float randRad = Random.Range(0, 2 * Mathf.PI);
             Vector3 randDir = new Vector3(Mathf.Sin(randRad), 0, Mathf.Cos(randRad));
-            Vector3 randPos = midPoint + randDir * Random.Range(0.2f, 4f);
+            Vector3 randPos = midPoint + randDir * Random.Range(0.2f, 5f);
             GameObject go = Instantiate(pawnPrefab, randPos, Quaternion.identity) as GameObject;
             PawnAIScript pa = go.GetComponent<PawnAIScript>();
             pa.CenterPoint = midPoint;

@@ -27,7 +27,7 @@ public class PawnAIScript : MonoBehaviour
     {
 
         float velocity = walkSpeed;
-        float rad = 2f;
+        float rad = 2.5f;
         float ringRad = 0.5f;
 
         NewDirTimer += Time.fixedDeltaTime;
