@@ -55,7 +55,7 @@ public class PawnAIScript : MonoBehaviour
 
         Debug.DrawLine(transform.position, CenterPoint);
 
-        transform.position += curDir * velocity * Time.fixedDeltaTime * (0.75f + 0.25f * Mathf.Abs(Mathf.Sin(Time.fixedTime / walkCycle * Mathf.PI)));
+        transform.position += curDir * velocity * Time.fixedDeltaTime * (0.5f + 0.5f * Mathf.Abs(Mathf.Sin(Time.fixedTime / walkCycle * Mathf.PI)));
 
     }
 

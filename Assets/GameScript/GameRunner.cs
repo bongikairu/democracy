@@ -8,6 +8,10 @@ public delegate void DayChangeHandler();
 public class GameRunner : MonoBehaviour
 {
 
+    public bool ThisIsDebug = false;
+
+    private Vector3 grav;
+
     public NotiScript notis;
 
     public UILabel DateLabel;
@@ -21,7 +25,7 @@ public class GameRunner : MonoBehaviour
 
     public event DayChangeHandler DayChanged;
 
-    private float DayProgress = 0.1f;//0.205f;  // new day in 0.2 secs
+    private float DayProgress = 0.205f;  // new day in 0.2 secs
     public float DayProgressTimer = 0f;
 
     public int MaxDay = 365 * 4;
@@ -56,6 +60,12 @@ public class GameRunner : MonoBehaviour
     private Color m_bad = new Color(255 / 255f, 173 / 255f, 0 / 255f);
     private Color m_angry = new Color(255 / 255f, 19 / 255f, 0 / 255f);
 
+    public UILabel LabelSatisLower;
+    public UILabel LabelSatisMiddle;
+    public UILabel LabelSatisHigher;
+    public UILabel LabelSatisArmed;
+    public UILabel LabelSatisFamily;
+
     private enum EndGameEnum
     {
         FeelNotRight,
@@ -70,11 +80,21 @@ public class GameRunner : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        grav = Physics.gravity;
+        Physics.gravity = Vector3.zero;
+        GameObject.Find("Intro").transform.localPosition -= new Vector3(0, 530.6501f + 189.6017f, 0);
+
+        if (ThisIsDebug)
+        {
+            Destroy(GameObject.Find("Intro"));
+            DayProgress = 0.1f;
+        }
+
         UpdateDateLabel();
         DayChanged += UpdateDateLabel;
         UpdateMoneyLabel();
         SpawnPawn();
-        if (!GameObject.Find("Intro"))
+        if (!GameObject.Find("Intro") || ThisIsDebug)
         {
             StartGame();
         }
@@ -107,6 +127,9 @@ public class GameRunner : MonoBehaviour
 
     public void StartGame()
     {
+
+        Physics.gravity = grav;
+
         Running = true;
         //Camera.main.GetComponent<AudioSource>().Play();
 
@@ -114,6 +137,8 @@ public class GameRunner : MonoBehaviour
 
         DayChanged += TaxRevenue;
         DayChanged += YearlyIncome;
+
+        DayChanged += YearlyMoodDecay;
 
         DayChanged += UpdatePawnHat;
         DayChanged += OverthrowCheck;
@@ -193,6 +218,20 @@ public class GameRunner : MonoBehaviour
         }
     }
 
+    private void YearlyMoodDecay()
+    {
+        DateTime d = BaseDate;
+        d = d.AddDays(CurrentDay);
+        if ((d.Month == 6 || d.Month == 12) && d.Day == 1)
+        {
+            SatisArmed--;
+            SatisFamily--;
+            SatisHigh--;
+            SatisLower--;
+            SatisMiddle--;
+        }
+    }
+
     BetterList<PawnAIScript> pawnArmed;
     BetterList<PawnAIScript> pawnLower;
     BetterList<PawnAIScript> pawnMiddle;
@@ -267,22 +306,27 @@ public class GameRunner : MonoBehaviour
                 case 0:
                     curMood = SatisArmed;
                     list = pawnArmed;
+                    SetMoodText(LabelSatisArmed, "Armed Force", curMood);
                     break;
                 case 1:
                     curMood = SatisLower;
                     list = pawnLower;
+                    SetMoodText(LabelSatisLower, "Lower Class", curMood);
                     break;
                 case 2:
                     curMood = SatisMiddle;
                     list = pawnMiddle;
+                    SetMoodText(LabelSatisMiddle, "Middle Class", curMood);
                     break;
                 case 3:
                     curMood = SatisHigh;
                     list = pawnHigher;
+                    SetMoodText(LabelSatisHigher, "Higher Class", curMood);
                     break;
                 case 4:
                     curMood = SatisFamily;
                     list = pawnFamily;
+                    SetMoodText(LabelSatisFamily, "Family", curMood);
                     break;
             }
             foreach (PawnAIScript pa in list)
@@ -293,6 +337,35 @@ public class GameRunner : MonoBehaviour
                 else if (curMood >= 2) pa.SetMoodColor(m_bad);
                 else pa.SetMoodColor(m_angry);
             }
+        }
+    }
+
+    private void SetMoodText(UILabel label,string type, int curMood)
+    {
+        if (curMood >= 10)
+        {
+            label.text = type + " : Very Happy";
+            label.color = m_max;
+        }
+        else if (curMood >= 7)
+        {
+            label.text = type + " : Happy";
+            label.color = m_good;
+        }
+        else if (curMood >= 4)
+        {
+            label.text = type + " : Normal";
+            label.color = m_normal;
+        }
+        else if (curMood >= 2)
+        {
+            label.text = type + " : Annoyed";
+            label.color = m_bad;
+        }
+        else
+        {
+            label.text = type + " : Angry";
+            label.color = m_angry;
         }
     }
 
@@ -320,7 +393,7 @@ public class GameRunner : MonoBehaviour
         else if (SatisLower <= 3 && !WarnSatisLower)
         {
             WarnSatisLower = true;
-            notis.AddNotis("Lower Class isn't satisfied with your reign. You should do something for them or they may get you in trouble.", c_warn);
+            notis.AddNotis("Lower Class isn't satisfied. You must do something for them or they may get you in trouble.", c_warn);
         }
         else if (SatisLower <= 0)
         {
@@ -336,7 +409,7 @@ public class GameRunner : MonoBehaviour
         else if (SatisMiddle <= 3 && !WarnSatisMiddle)
         {
             WarnSatisMiddle = true;
-            notis.AddNotis("Middle Class isn't satisfied with your reign. You should do something for them or they may get you in trouble.", c_warn);
+            notis.AddNotis("Middle Class isn't satisfied. You must do something for them or they may get you in trouble.", c_warn);
         }
         else if (SatisMiddle <= 0)
         {
@@ -352,7 +425,7 @@ public class GameRunner : MonoBehaviour
         else if (SatisHigh <= 3 && !WarnSatisHigh)
         {
             WarnSatisHigh = true;
-            notis.AddNotis("Lower Class isn't satisfied with your reign. You should do something for them or they may get you in trouble.", c_warn);
+            notis.AddNotis("Higher Class isn't satisfied. You must do something for them or they may get you in trouble.", c_warn);
         }
         else if (SatisHigh <= 0)
         {
@@ -368,7 +441,7 @@ public class GameRunner : MonoBehaviour
         else if (SatisArmed <= 3 && !WarnSatisArmed)
         {
             WarnSatisArmed = true;
-            notis.AddNotis("Lower Class isn't satisfied with your reign. You should do something for them or they may get you in trouble.", c_warn);
+            notis.AddNotis("Armed Force isn't satisfied. You must do something for them or they may get you in trouble.", c_warn);
         }
         else if (SatisArmed <= 0)
         {
@@ -384,7 +457,7 @@ public class GameRunner : MonoBehaviour
         else if (SatisFamily <= 3 && !WarnSatisFamily)
         {
             WarnSatisFamily = true;
-            notis.AddNotis("Lower Class isn't satisfied with your reign. You should do something for them or they may get you in trouble.", c_warn);
+            notis.AddNotis("Your Family isn't satisfied. You must do something for them or they may get you in trouble.", c_warn);
         }
         else if (SatisFamily <= 0)
         {
