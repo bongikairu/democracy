@@ -11,7 +11,7 @@ public class IntroController : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        EventDelegate.Add(GameObject.Find("Text7").GetComponent<TweenAlpha>().onFinished, IntroFadedFinished);
+        EventDelegate.Add(GameObject.Find("Intro/Text7").GetComponent<TweenAlpha>().onFinished, IntroFadedFinished);
         GameObject[] gos = GameObject.FindGameObjectsWithTag("IntroLabel");
         foreach (GameObject go in gos)
         {
@@ -20,7 +20,7 @@ public class IntroController : MonoBehaviour
         }
         for (int i = 0; i <= 6; i++)
         {
-            GameObject go = GameObject.Find("Text" + (i + 1));
+            GameObject go = GameObject.Find("Intro/Text" + (i + 1));
             TweenPosition pos = go.AddComponent<TweenPosition>();
             pos.from = go.transform.localPosition + new Vector3(3.5f, 0, 0);
             pos.to = go.transform.localPosition;
@@ -96,7 +96,7 @@ public class IntroController : MonoBehaviour
         int i = 0;
         for (i = 0; i <= 6; i++)
         {
-            GameObject go = GameObject.Find("Text" + (i + 1));
+            GameObject go = GameObject.Find("Intro/Text" + (i + 1));
             TweenPosition pos = go.GetComponent<TweenPosition>();
             pos.from = go.transform.localPosition;
             pos.to = go.transform.localPosition + GetVector(i);
@@ -110,7 +110,7 @@ public class IntroController : MonoBehaviour
             pos.PlayForward();
         }
 
-        GameObject.Find("Hider").GetComponent<TweenColor>().enabled = true;
+        GameObject.Find("Intro/Hider").GetComponent<TweenColor>().enabled = true;
 
         finished = true;
 

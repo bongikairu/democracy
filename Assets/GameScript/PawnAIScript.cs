@@ -20,6 +20,9 @@ public class PawnAIScript : MonoBehaviour
         NewDirTimer = RandDirTime + 1;
         walkCycle = Random.Range(0.8f, 2f);
         walkSpeed = Random.Range(0.15f, 0.25f);
+
+        transform.GetComponent<MeshRenderer>().material.color = Color.Lerp(transform.GetComponent<MeshRenderer>().material.color, new Color(90f / 255f, 69f / 255f, 60f / 255f), Random.Range(0f, 0.5f));
+
     }
 
     // Update is called once per frame

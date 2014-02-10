@@ -82,7 +82,7 @@ public class GameRunner : MonoBehaviour
     {
         grav = Physics.gravity;
         //Physics.gravity = Vector3.zero;
-        GameObject.Find("Intro").transform.localPosition -= new Vector3(0, 530.6501f + 189.6017f, 0);
+        GameObject.Find("Intro").transform.localPosition -= new Vector3(0, GameObject.Find("Intro").transform.localPosition.y + 189.6017f, 0);
 
         if (ThisIsDebug)
         {
@@ -167,8 +167,14 @@ public class GameRunner : MonoBehaviour
                 DayChanged();
             }
 
-
             UpdateMoneyLabel();
+
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                EndGameType = EndGameEnum.FeelNotRight;
+                EndGame();
+            }
+        
         }
     }
 
@@ -253,7 +259,7 @@ public class GameRunner : MonoBehaviour
         pawnHigher = new BetterList<PawnAIScript>();
         pawnFamily = new BetterList<PawnAIScript>();
 
-        Vector3 midPoint = new Vector3(51.0728f, 0.6888365f, -2.616897f);
+        Vector3 midPoint = new Vector3(51.0728f, 0.2888365f, -2.616897f);
 
         int numArmed = 6;
         int numLower = 20;
@@ -514,30 +520,87 @@ public class GameRunner : MonoBehaviour
 
     private void EndGame()
     {
+
+        if (!Running) return;
+
         Running = false;
+        GameObject.Find("GameOver/Text2").GetComponent<UILabel>().text = FormatMoney(MoneySwiss);
+
         switch (EndGameType)
         {
             case EndGameEnum.FeelNotRight:
                 notis.AddNotis("You feel that this isn't the right thing and resigned. You still made " + FormatMoney(MoneySwiss) + " from your career.", c_info);
+                GameObject.Find("GameOver/Text1").GetComponent<UILabel>().text = "You feel that this isn't the right thing and resigned.";
+                GameObject.Find("GameOver/Text3").GetComponent<UILabel>().text = "is all donated anonymously to the 3ʳᵈ world country.";
                 break;
             case EndGameEnum.TimeUp:
                 notis.AddNotis("Your time as P.M. has ended. You made " + FormatMoney(MoneySwiss) + " from your career.", c_info);
+                GameObject.Find("GameOver/Text1").GetComponent<UILabel>().text = "Your time as P.M. has ended.";
+                GameObject.Find("GameOver/Text3").GetComponent<UILabel>().text = "in you swiss bank account is still safe.";
                 break;
             case EndGameEnum.OverthrownLower:
                 notis.AddNotis("Lower Class protest against you and forced you to resign. You made " + FormatMoney(MoneySwiss) + " from your career.", c_info);
+                GameObject.Find("GameOver/Text1").GetComponent<UILabel>().text = "Lower Class protest against you and forced you to resign.";
+                GameObject.Find("GameOver/Text3").GetComponent<UILabel>().text = "in you swiss bank account is still safe.";
                 break;
             case EndGameEnum.OverthrownMiddle:
                 notis.AddNotis("Middle Class signed a petition and remove you from power. You made " + FormatMoney(MoneySwiss) + " from your career.", c_info);
+                GameObject.Find("GameOver/Text1").GetComponent<UILabel>().text = "Middle Class signed a petition and remove you from power.";
+                GameObject.Find("GameOver/Text3").GetComponent<UILabel>().text = "in you swiss bank account is still safe.";
                 break;
             case EndGameEnum.OverthrownHigher:
                 notis.AddNotis("Higher Class blackmail you and forced you to resign. You made " + FormatMoney(MoneySwiss) + " from your career.", c_info);
+                GameObject.Find("GameOver/Text1").GetComponent<UILabel>().text = "Higher Class blackmail you and forced you to resign.";
+                GameObject.Find("GameOver/Text3").GetComponent<UILabel>().text = "in you swiss bank account is still safe.";
                 break;
             case EndGameEnum.OverthrownArmed:
                 notis.AddNotis("Armed force seized the power and forced you to flee the country. Your " + FormatMoney(MoneySwiss) + " is sill safe in Swiss Bank.", c_info);
+                GameObject.Find("GameOver/Text1").GetComponent<UILabel>().text = "Armed force seized the power and forced you to flee the country.";
+                GameObject.Find("GameOver/Text3").GetComponent<UILabel>().text = "in you swiss bank account is still safe.";
                 break;
             case EndGameEnum.BrokenFamily:
                 notis.AddNotis("Your discovered that your wife has an affair. Feeling despair, you left everything and become a monk. You donated all " + FormatMoney(MoneySwiss) + " you made to 3ʳᵈ world country.", c_info);
+                GameObject.Find("GameOver/Text1").GetComponent<UILabel>().text = "Your discovered that your wife has an affair.\nFeeling despair, you left everything and become a monk.";
+                GameObject.Find("GameOver/Text3").GetComponent<UILabel>().text = "is all donated anonymously to the 3ʳᵈ world country.";
                 break;
+        }
+
+        GameObject.Find("GameOver").transform.localPosition -= new Vector3(0, GameObject.Find("GameOver").transform.localPosition.y + 189.6017f, 0);
+
+        GameObject.Find("GameOver/Hider").GetComponent<TweenColor>().enabled = true;
+
+        GameObject[] gos = GameObject.FindGameObjectsWithTag("OutroLabel");
+        foreach (GameObject go in gos)
+        {
+            TweenAlpha alp = go.GetComponent<TweenAlpha>();
+            if (alp) alp.enabled = false;
+        }
+        for (int i = 0; i <= 5; i++)
+        {
+            GameObject go = GameObject.Find("GameOver/Text" + (i + 1));
+            TweenPosition pos = go.AddComponent<TweenPosition>();
+            pos.from = go.transform.localPosition + new Vector3(3.5f, 0, 0);
+            pos.to = go.transform.localPosition;
+            pos.duration = 1.0f;
+            pos.animationCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
+            //pos.animationCurve.SmoothTangents(2, 10);
+            pos.delay = GetOutroDelay(i);
+        }
+
+    }
+
+    private float GetOutroDelay(int i)
+    {
+        switch (i)
+        {
+            case 0: return 0f;
+            case 1: return 0.5f;
+            case 2: return 1f;
+            case 3: return 1.5f;
+            case 4: return 1.5f;
+            case 5: return 2.5f;
+            case 6: return 3f;
+            default: return 1f;
         }
     }
 
