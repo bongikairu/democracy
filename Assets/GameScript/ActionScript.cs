@@ -54,7 +54,7 @@ public class ActionScript : MonoBehaviour
             case Action.ThailandTelecom:    return "My Neighbor Thailando";
             case Action.TelecomTax:         return "Stright to the point, lower the tax";
             case Action.ForeignTelecom:     return "And then sell it to foreigner";
-            default: return "Unknown";
+            default: return "None";
         }
     }
 
@@ -290,7 +290,7 @@ public class ActionScript : MonoBehaviour
             case Action.FamilyGeneral: return "Armed Force support falls slower";
             case Action.FamilyPolice: return "Corruption exposed don't decrease your income anymore";
             case Action.Privatization: return "Nation revenue -25%, 5% of revenue credit to you";
-            case Action.FreeUtils: return "Nation revenue -200 M§/m";
+            case Action.FreeUtils: return "+1 M§/m, Nation revenue -200 M§/m";
             case Action.WealthVilleLand: return "-";
             case Action.ThailandTelecom: return "You gain 200 M§ upfront";
             case Action.TelecomTax: return "+1 M§/m, Nation revenue -100 M§/m";

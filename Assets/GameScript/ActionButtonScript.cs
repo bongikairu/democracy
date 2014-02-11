@@ -74,10 +74,30 @@ public class ActionButtonScript : MonoBehaviour
 
     internal void OnClick()
     {
-        if (Type == BtnType.None) return;
+        if (Type == BtnType.None)
+        {
+            GameObject.Find("MenuSound2").GetComponent<AudioSource>().time = 0f;
+            GameObject.Find("MenuSound2").GetComponent<AudioSource>().Play();
+            return;
+        }
 
-        Type = BtnType.None;
-        TooltipScript.me.Hide();
+        
+
+        if (GameRunner.me.DoAction(Action))
+        {
+            Action = ActionScript.Action.None;
+            TooltipScript.me.Hide();
+
+            GameObject.Find("MenuSound").GetComponent<AudioSource>().time = 0f;
+            GameObject.Find("MenuSound").GetComponent<AudioSource>().Play();
+
+        }
+        else
+        {
+            GameObject.Find("MenuSound2").GetComponent<AudioSource>().time = 0f;
+            GameObject.Find("MenuSound2").GetComponent<AudioSource>().Play();
+        }
+        
     }
 
     internal void OnHover(bool isOver)

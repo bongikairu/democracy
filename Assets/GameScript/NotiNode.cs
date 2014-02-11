@@ -20,6 +20,8 @@ class NotiNode
     public NotiNode prevNode;
     public NotiNode nextNode;
 
+    private float Age = 10f;
+
     internal NotiNode Progress()
     {
 
@@ -61,7 +63,7 @@ class NotiNode
                 tp.PlayForward();
             }
             // check for ages
-            if (state == State.Displaying && Time.fixedTime - startTime > 5f)
+            if (state == State.Displaying && Time.fixedTime - startTime > Age)
             {
                 state = State.Leaving;
                 TweenPosition tp = label.gameObject.GetComponent<TweenPosition>();

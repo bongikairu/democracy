@@ -8,6 +8,8 @@ public delegate void DayChangeHandler();
 public class GameRunner : MonoBehaviour
 {
 
+    public static GameRunner me;
+
     public bool ThisIsDebug = false;
 
     private Vector3 grav;
@@ -84,7 +86,9 @@ public class GameRunner : MonoBehaviour
     void Start()
     {
 
-        Debug.Log(ActionScript.GetPro(ActionScript.Action.FamilyPolice));
+        me = this;
+
+        //Debug.Log(ActionScript.GetPro(ActionScript.Action.FamilyPolice));
 
         grav = Physics.gravity;
         //Physics.gravity = Vector3.zero;
@@ -157,6 +161,9 @@ public class GameRunner : MonoBehaviour
 
         notis.AddNotis("Welcome, P.M. Thee Sinatra. You now have full control of Sarkhan Country." + GetDayStringShort(CurrentDay), c_info);
 
+        DayChanged += DoCampaignRunning;
+        DayChanged += DoCampaignAftermath;
+
         DayChanged += TaxRevenue;
         DayChanged += YearlyIncome;
 
@@ -188,6 +195,11 @@ public class GameRunner : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.Escape))
             {
+
+                Camera.main.GetComponent<AudioSource>().Stop();
+                GameObject.Find("Rocketbird").GetComponent<AudioSource>().Play();
+                GameObject.Find("Rocketbird").GetComponent<AudioSource>().time = 43.3f;
+
                 EndGameType = EndGameEnum.FeelNotRight;
                 EndGame();
             }
@@ -215,22 +227,34 @@ public class GameRunner : MonoBehaviour
         d = d.AddDays(CurrentDay);
         if (d.Day == 1)
         {
+            int toAdd = 0;
             if (d.Month == 3)
             {
                 // yearly extra
-                int toAdd = Random.Range(5000, 20000);
-                //Debug.Log(toAdd);
-                MoneyNation += toAdd;
-                notis.AddNotis("Nation earns " + FormatMoney(toAdd) + " from yearly tax revenue." + GetDayStringShort(CurrentDay), c_good);
+                toAdd = Random.Range(500, 5000);
             }
             else
             {
                 // monthly normal
-                int toAdd = Random.Range(100, 3000);
-                //Debug.Log(toAdd);
-                MoneyNation += toAdd;
-                notis.AddNotis("Nation earns " + FormatMoney(toAdd) + " from monthly tax revenue." + GetDayStringShort(CurrentDay), c_good);
+                toAdd = Random.Range(0, 1000);
             }
+
+            int directGain = toAdd * (5 * MonthlyDirectGain) / 100;
+
+            if (directGain > 0)
+            {
+                MoneySwiss += directGain;
+                notis.AddNotis("You earns " + FormatMoney(toAdd) + " from direct cut." + GetDayStringShort(CurrentDay), c_good);
+            }
+
+            toAdd *= MonthlyNationGain;
+            toAdd /= 4;
+
+            toAdd -= MonthlyNationLoss;
+
+            MoneyNation += toAdd;
+            notis.AddNotis("Nation earns " + FormatMoney(toAdd) + " from tax revenue." + GetDayStringShort(CurrentDay), c_good);
+
         }
     }
 
@@ -263,14 +287,62 @@ public class GameRunner : MonoBehaviour
     {
         DateTime d = BaseDate;
         d = d.AddDays(CurrentDay);
-        if ((d.Month == 3 || d.Month == 12) && d.Day == 1)
+
+        if ((d.Month % 2 == 0) && d.Day == 1)
         {
-            SatisArmed--;
+            if (MoneyNation < 0)
+            {
+                if (InArmy && d.Month % 4 == 0) SatisArmed--;
+            }
+        }
+
+        if ((d.Month %4 == 0) && d.Day == 1)
+        {
+            
+            SatisFamily--;
+            
+            /* SatisHigh--;
+            SatisLower--;
+            SatisMiddle--; */
+
+            if (DrugViolence)
+            {
+                SatisHigh--;
+                SatisLower--;
+                SatisMiddle--;
+                if (!InArmy)
+                {
+                    SatisArmed--;
+                }
+            }
+            if (ExposedCorruption > 0)
+            {
+                if (SarkhanWeekly)
+                {
+                    SatisLower--;
+                    SatisMiddle--;
+                }
+                else
+                {
+                    SatisMiddle -= 2;
+                }
+                SatisHigh--;
+                if (!InArmy)
+                {
+                    SatisArmed--;
+                }
+            }
+        }
+
+        if (d.Month == 1 && d.Day==30)
+        {
             SatisFamily--;
             SatisHigh--;
             SatisLower--;
             SatisMiddle--;
+            SatisArmed--;
         }
+
     }
 
     BetterList<PawnAIScript> pawnArmed;
@@ -673,6 +745,221 @@ public class GameRunner : MonoBehaviour
             case 6: return 3f;
             default: return 1f;
         }
+    }
+
+    private bool CampaignRunning = false;
+    private int CampaignTimer = 0;
+    private ActionScript.Action CurAction;
+
+    private int MonthlyIncome = 0;
+    private int MonthlyNationGain = 4;  // 25% each to nation
+    private int MonthlyNationLoss = 0;
+    private int MonthlyDirectGain = 0;  // 5% each to swiss
+    private int ExposedCorruption = 0;  // -20% each from MonthlyIncome
+    private int UnexposedCorruption = 0;
+
+    private bool DrugViolence = false;
+    private bool SarkhanWeekly = false;
+    private bool InArmy = false;
+    private bool InPolice = false;
+
+    public bool DoAction(ActionScript.Action act)
+    {
+        if (CampaignRunning) return false;
+        //if (MoneyNation < ActionScript.GetPrice(act)) return false; // insufficient fund
+
+        CampaignTimer = ActionScript.GetDays(act);
+        CampaignRunning = true;
+        CurAction = act;
+
+        MoneyNation -= ActionScript.GetPrice(act);
+
+        return true;
+
+    }
+
+    void DoCampaignRunning()
+    {
+        if (CampaignTimer > 0)
+        {
+            CampaignTimer--;
+
+            DoCampaignProgress(CurAction);
+
+            if (CampaignTimer == 0)
+            {
+                CampaignRunning = false;
+                CurAction = ActionScript.Action.None;
+            }
+
+        }
+
+        if (CampaignTimer > 0) GameObject.Find("CurrentCampaign").GetComponent<UILabel>().text = "Current Campaign: " + ActionScript.GetName(CurAction) + " (" + CampaignTimer + " days left)";
+        else GameObject.Find("CurrentCampaign").GetComponent<UILabel>().text = "Current Campaign: " + ActionScript.GetName(CurAction) + "";
+
+    }
+
+    void DoCampaignProgress(ActionScript.Action act)
+    {
+        if (act == ActionScript.Action.GoldenLandAirport)
+        {
+            if (CampaignTimer % 30 == 0)
+            {
+                MoneySwiss += 60;
+            }
+        }
+
+        // end time
+        if (CampaignTimer == 0)
+        {
+            notis.AddNotis("Campaign [000000]" + ActionScript.GetName(act) + "[FFFFFF] is completed" + GetDayStringShort(CurrentDay), c_good);
+            switch (act)
+            {
+                case ActionScript.Action.SinatraCare:
+                    SatisLower += 2;
+                    MonthlyIncome += 1;
+                    MonthlyNationGain--;
+                    GameObject.Find("ActionBar/Slot1").GetComponent<ActionButtonScript>().Action = ActionScript.Action.HospitalStock;
+                    break;
+                case ActionScript.Action.HospitalStock:
+                    SatisFamily += 1;
+                    MonthlyDirectGain++;
+                    UnexposedCorruption++;
+                    break;
+                case ActionScript.Action.OTOP:
+                    SatisLower += 2;
+                    MonthlyIncome += 1;
+                    MonthlyNationLoss += 200;
+                    GameObject.Find("ActionBar/Slot2").GetComponent<ActionButtonScript>().Action = ActionScript.Action.RaiseMinWage;
+                    break;
+                case ActionScript.Action.RaiseMinWage:
+                    SatisLower += 2;
+                    SatisMiddle -= 1;
+                    SatisHigh -= 2;
+                    MonthlyNationGain--;
+                    break;
+                case ActionScript.Action.DrugWars:
+                    SatisLower += 1;
+                    SatisMiddle += 2;
+                    SatisHigh += 2;
+                    DrugViolence = true;
+                    GameObject.Find("ActionBar/Slot3").GetComponent<ActionButtonScript>().Action = ActionScript.Action.KillSam;
+                    break;
+                case ActionScript.Action.KillSam:
+                    SatisMiddle -= 1;
+                    DrugViolence = false;
+                    break;
+                case ActionScript.Action.OCPC:
+                    SatisLower += 2;
+                    SatisMiddle += 1;
+                    SarkhanWeekly = true;
+                    GameObject.Find("ActionBar/Slot4").GetComponent<ActionButtonScript>().Action = ActionScript.Action.SarkhanWeekly;
+                    break;
+                case ActionScript.Action.SarkhanWeekly:
+                    SatisMiddle -= 2;
+                    SarkhanWeekly = false;
+                    break;
+                case ActionScript.Action.MyFirstCar:
+                    SatisLower += 1;
+                    SatisMiddle += 2;
+                    SatisHigh += 1;
+                    MonthlyNationLoss += 300;
+                    GameObject.Find("ActionBar/Slot5").GetComponent<ActionButtonScript>().Action = ActionScript.Action.GoldenLandAirport;
+                    break;
+                case ActionScript.Action.GoldenLandAirport:
+                    SatisMiddle+=2;
+                    SatisHigh += 2;
+                    break;
+                case ActionScript.Action.PauseLoan:
+                    SatisLower += 2;
+                    MonthlyNationLoss += 400;
+                    GameObject.Find("ActionBar/Slot6").GetComponent<ActionButtonScript>().Action = ActionScript.Action.RicePriceGuarantee;
+                    break;
+                case ActionScript.Action.RicePriceGuarantee:
+                    SatisLower += 2;
+                    MonthlyNationGain--;
+                    break;
+                case ActionScript.Action.FamilyGeneral:
+                    SatisFamily += 1;
+                    SatisArmed += 2;
+                    InArmy = true;
+                    GameObject.Find("ActionBar/Slot7").GetComponent<ActionButtonScript>().Action = ActionScript.Action.FamilyPolice;
+                    break;
+                case ActionScript.Action.FamilyPolice:
+                    SatisFamily += 1;
+                    SatisArmed += 1;
+                    SatisMiddle -= 1;
+                    InPolice = true;
+                    break;
+                case ActionScript.Action.Privatization:
+                    SatisMiddle -= 1;
+                    SatisHigh -= 1;
+                    MonthlyNationGain--;
+                    MonthlyDirectGain++;
+                    GameObject.Find("ActionBar/Slot8").GetComponent<ActionButtonScript>().Action = ActionScript.Action.FreeUtils;
+                    break;
+                case ActionScript.Action.FreeUtils:
+                    SatisLower += 2;
+                    MonthlyIncome += 1;
+                    MonthlyNationLoss += 200;
+                    break;
+                case ActionScript.Action.WealthVilleLand:
+                    SatisFamily += 2;
+                    SatisMiddle -= 1;
+                    UnexposedCorruption++;
+                    GameObject.Find("ActionBar/Slot9").GetComponent<ActionButtonScript>().Action = ActionScript.Action.ThailandTelecom;
+                    break;
+                case ActionScript.Action.ThailandTelecom:
+                    SatisFamily += 1;
+                    SatisMiddle -= 1;
+                    MoneySwiss += 200;
+                    UnexposedCorruption++;
+                    break;
+                case ActionScript.Action.TelecomTax:
+                    SatisFamily += 1;
+                    MonthlyIncome += 1;
+                    MonthlyNationLoss += 100;
+                    UnexposedCorruption++;
+                    GameObject.Find("ActionBar/Slot10").GetComponent<ActionButtonScript>().Action = ActionScript.Action.ForeignTelecom;
+                    break;
+                case ActionScript.Action.ForeignTelecom:
+                    SatisFamily += 1;
+                    SatisMiddle -= 1;
+                    MoneySwiss += 300;
+                    UnexposedCorruption++;
+                    break;
+            }
+        }
+
+    }
+
+    void DoCampaignAftermath()
+    {
+        DateTime d = BaseDate;
+        d = d.AddDays(CurrentDay);
+        if (d.Day == 1)
+        {
+            int toAdd = 0;
+            if (InPolice) toAdd = MonthlyIncome;
+            else toAdd = MonthlyIncome * (5 - ExposedCorruption) / 5;
+            MoneySwiss += toAdd;
+            if(toAdd>0) notis.AddNotis("You earns " + FormatMoney(toAdd) + " from monthly project cut" + GetDayStringShort(CurrentDay), c_good);
+        }
+
+        if (d.Day == 15)
+        {
+            for (int i = 0; i < UnexposedCorruption; i++)
+            {
+                float chance = Random.Range(0f,1f);
+                if(chance<0.05) {
+                    UnexposedCorruption--;
+                    ExposedCorruption++;
+                    i--;
+                    notis.AddNotis("Your corruption has been exposed, you will lose support and gain less money" + GetDayStringShort(CurrentDay), c_warn);
+                }
+            }
+        }
+
     }
 
 }
