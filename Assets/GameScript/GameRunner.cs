@@ -66,6 +66,9 @@ public class GameRunner : MonoBehaviour
     public UILabel LabelSatisArmed;
     public UILabel LabelSatisFamily;
 
+    public GameObject SmileyGood;
+    public GameObject SmileyBad;
+
     private enum EndGameEnum
     {
         FeelNotRight,
@@ -229,11 +232,24 @@ public class GameRunner : MonoBehaviour
         }
     }
 
+    // satisfaction variable
+    private int SatisLower = 8;
+    private int SatisMiddle = 5;
+    private int SatisHigh = 6;
+    private int SatisArmed = 6;
+    private int SatisFamily = 9;
+
+    private int LastSatisLower = 8;
+    private int LastSatisMiddle = 5;
+    private int LastSatisHigh = 6;
+    private int LastSatisArmed = 6;
+    private int LastSatisFamily = 9;
+
     private void YearlyMoodDecay()
     {
         DateTime d = BaseDate;
         d = d.AddDays(CurrentDay);
-        if ((d.Month == 6 || d.Month == 12) && d.Day == 1)
+        if ((d.Month == 3 || d.Month == 12) && d.Day == 1)
         {
             SatisArmed--;
             SatisFamily--;
@@ -311,31 +327,63 @@ public class GameRunner : MonoBehaviour
         for (int i = 0; i < 5; i++)
         {
             int curMood = 10;
+            bool MoodChanged = false;
+            bool MoodBetter = false;
             BetterList<PawnAIScript> list = pawnArmed;
             switch (i)
             {
                 case 0:
                     curMood = SatisArmed;
+                    if (curMood != LastSatisArmed)
+                    {
+                        if (curMood > LastSatisArmed) MoodBetter = true;
+                        LastSatisArmed = curMood;
+                        MoodChanged = true;
+                    }
                     list = pawnArmed;
                     SetMoodText(LabelSatisArmed, "Armed Force", curMood);
                     break;
                 case 1:
                     curMood = SatisLower;
+                    if (curMood != LastSatisLower)
+                    {
+                        if (curMood > LastSatisLower) MoodBetter = true;
+                        LastSatisLower = curMood;
+                        MoodChanged = true;
+                    }
                     list = pawnLower;
                     SetMoodText(LabelSatisLower, "Lower Class", curMood);
                     break;
                 case 2:
                     curMood = SatisMiddle;
+                    if (curMood != LastSatisMiddle)
+                    {
+                        if (curMood > LastSatisMiddle) MoodBetter = true;
+                        LastSatisMiddle = curMood;
+                        MoodChanged = true;
+                    }
                     list = pawnMiddle;
                     SetMoodText(LabelSatisMiddle, "Middle Class", curMood);
                     break;
                 case 3:
                     curMood = SatisHigh;
+                    if (curMood != LastSatisHigh)
+                    {
+                        if (curMood > LastSatisHigh) MoodBetter = true;
+                        LastSatisHigh = curMood;
+                        MoodChanged = true;
+                    }
                     list = pawnHigher;
                     SetMoodText(LabelSatisHigher, "Higher Class", curMood);
                     break;
                 case 4:
                     curMood = SatisFamily;
+                    if (curMood != LastSatisFamily)
+                    {
+                        if (curMood > LastSatisFamily) MoodBetter = true;
+                        LastSatisFamily = curMood;
+                        MoodChanged = true;
+                    }
                     list = pawnFamily;
                     SetMoodText(LabelSatisFamily, "Family", curMood);
                     break;
@@ -347,6 +395,22 @@ public class GameRunner : MonoBehaviour
                 else if (curMood >= 4) pa.SetMoodColor(m_normal);
                 else if (curMood >= 2) pa.SetMoodColor(m_bad);
                 else pa.SetMoodColor(m_angry);
+
+                if (MoodChanged)
+                {
+                    Vector3 ObjPosOnCam = Camera.main.WorldToScreenPoint(pa.transform.position);
+                    // spawn smiley
+                    Vector3 ppos = new Vector3(ObjPosOnCam.x * 1280f / Camera.main.pixelWidth - 640f, ObjPosOnCam.y * 720 / Camera.main.pixelHeight - 360f + 30f, 0f);
+                    //Debug.DrawLine(Vector3.zero, ppos);
+                    //Debug.Log(ppos);
+                    GameObject sm = SmileyBad;
+                    if (MoodBetter) sm = SmileyGood;
+                    GameObject go = Instantiate(sm, Vector3.up, Quaternion.identity) as GameObject;
+                    go.GetComponent<SmileyAuto>().Animate(ppos);
+                    
+                    //Debug.Break();
+                }
+                
             }
         }
     }
@@ -379,13 +443,6 @@ public class GameRunner : MonoBehaviour
             label.color = m_angry;
         }
     }
-
-    // satisfaction variable
-    private int SatisLower = 8;
-    private int SatisMiddle = 5;
-    private int SatisHigh = 6;
-    private int SatisArmed = 6;
-    private int SatisFamily = 9;
 
     private bool WarnSatisLower = false;
     private bool WarnSatisMiddle = false;
