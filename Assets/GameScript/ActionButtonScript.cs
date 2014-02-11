@@ -18,8 +18,9 @@ public class ActionButtonScript : MonoBehaviour
         Corrupt
     };
 
+    public ActionScript.Action Action;
     public BtnType Type;
-    public string abbrev;
+    public string Abbrev;
 
     private static void Load()
     {
@@ -44,6 +45,10 @@ public class ActionButtonScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+        Type = ActionScript.GetType(Action);
+        Abbrev = ActionScript.GetAbbrev(Action);
+
         UITexture uit = transform.FindChild("BaseImg").GetComponent<UITexture>();
         switch (Type)
         {
@@ -61,7 +66,7 @@ public class ActionButtonScript : MonoBehaviour
         else uit.enabled = false;
 
         UILabel uil = transform.FindChild("Label").GetComponent<UILabel>();
-        uil.text = abbrev;
+        uil.text = Abbrev;
         if (Type != BtnType.None) uil.enabled = true;
         else uil.enabled = false;
 
@@ -82,6 +87,11 @@ public class ActionButtonScript : MonoBehaviour
         if (isOver)
         {
             // populate data
+            TooltipScript.me.transform.FindChild("Name").GetComponent<UILabel>().text = ActionScript.GetName(Action);
+            TooltipScript.me.transform.FindChild("Details").GetComponent<UILabel>().text = ActionScript.GetDetail(Action);
+            TooltipScript.me.transform.FindChild("Desc").GetComponent<UILabel>().text = ActionScript.GetDesc(Action);
+            TooltipScript.me.transform.FindChild("Effects").GetComponent<UILabel>().text = ActionScript.GetEffects(Action);
+            TooltipScript.me.transform.FindChild("Pro").GetComponent<UILabel>().text = ActionScript.GetPro(Action);
 
             TooltipScript.me.Show();
         }

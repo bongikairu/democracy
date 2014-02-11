@@ -83,6 +83,9 @@ public class GameRunner : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+
+        Debug.Log(ActionScript.GetPro(ActionScript.Action.FamilyPolice));
+
         grav = Physics.gravity;
         //Physics.gravity = Vector3.zero;
         GameObject.Find("Intro").transform.localPosition -= new Vector3(0, GameObject.Find("Intro").transform.localPosition.y + 189.6017f, 0);
@@ -116,7 +119,7 @@ public class GameRunner : MonoBehaviour
         UpdateMoneyLabellet(LabelMoneyNation,MoneyNation);
     }
 
-    private string FormatMoney(int val)
+    public static string FormatMoney(int val)
     {
         return val.ToString("n0") + "  M§";
     }
@@ -137,6 +140,17 @@ public class GameRunner : MonoBehaviour
     {
 
         PreStartGame();
+
+        GameObject.Find("ActionBar/Slot1").GetComponent<ActionButtonScript>().Action = ActionScript.Action.SinatraCare;
+        GameObject.Find("ActionBar/Slot2").GetComponent<ActionButtonScript>().Action = ActionScript.Action.OTOP;
+        GameObject.Find("ActionBar/Slot3").GetComponent<ActionButtonScript>().Action = ActionScript.Action.DrugWars;
+        GameObject.Find("ActionBar/Slot4").GetComponent<ActionButtonScript>().Action = ActionScript.Action.OCPC;
+        GameObject.Find("ActionBar/Slot5").GetComponent<ActionButtonScript>().Action = ActionScript.Action.MyFirstCar;
+        GameObject.Find("ActionBar/Slot6").GetComponent<ActionButtonScript>().Action = ActionScript.Action.PauseLoan;
+        GameObject.Find("ActionBar/Slot7").GetComponent<ActionButtonScript>().Action = ActionScript.Action.FamilyGeneral;
+        GameObject.Find("ActionBar/Slot8").GetComponent<ActionButtonScript>().Action = ActionScript.Action.Privatization;
+        GameObject.Find("ActionBar/Slot9").GetComponent<ActionButtonScript>().Action = ActionScript.Action.WealthVilleLand;
+        GameObject.Find("ActionBar/Slot10").GetComponent<ActionButtonScript>().Action = ActionScript.Action.TelecomTax;
 
         Running = true;
         //Camera.main.GetComponent<AudioSource>().Play();
