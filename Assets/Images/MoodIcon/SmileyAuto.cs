@@ -1,12 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class SmileyAuto : MonoBehaviour {
+public class SmileyAuto : MonoBehaviour
+{
 
-	// Use this for initialization
-	void Start () {
-        
-	}
+    // Use this for initialization
+    void Start()
+    {
+        transform.GetComponent<UITexture>().depth = 25;
+    }
 
     public void Animate(Vector3 startPos)
     {
@@ -34,9 +36,10 @@ public class SmileyAuto : MonoBehaviour {
     {
         Destroy(gameObject);
     }
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
+
+    // Update is called once per frame
+    void Update()
+    {
+
+    }
 }
