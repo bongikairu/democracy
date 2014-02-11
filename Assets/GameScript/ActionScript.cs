@@ -240,7 +240,7 @@ public class ActionScript : MonoBehaviour
                         "except you will gain more Lower Class supports.";
             case Action.FamilyGeneral: // อันนี้ทหาร - action แต่งตั้งทหารมาก่อนตำรวจ
                 return "A commander-in-chief sure is a man of power.\n" +
-                        "But whose power to command?";
+                        "But who will command him?";
             case Action.FamilyPolice: // แต่งตั้งพรรคพวกเข้าไปเป็นหัวหน้าตำรวจหน่ะ
                 return "Want a decent chief of police? You get it!\n" +
                         "How can I know? He’s my relative!";

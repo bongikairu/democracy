@@ -71,6 +71,8 @@ public class GameRunner : MonoBehaviour
     public GameObject SmileyGood;
     public GameObject SmileyBad;
 
+    public bool IsForward = false;
+
     private enum EndGameEnum
     {
         FeelNotRight,
@@ -183,6 +185,10 @@ public class GameRunner : MonoBehaviour
     {
         if (Running)
         {
+
+            DayProgress = 1.230f;
+            if (CampaignTimer > 0 || IsForward) DayProgress = 0.105f;
+
             DayProgressTimer += Time.fixedDeltaTime;
             while (DayProgressTimer >= DayProgress)
             {
@@ -231,12 +237,12 @@ public class GameRunner : MonoBehaviour
             if (d.Month == 3)
             {
                 // yearly extra
-                toAdd = Random.Range(500, 5000);
+                toAdd = Random.Range(3000, 8000);
             }
             else
             {
                 // monthly normal
-                toAdd = Random.Range(0, 1000);
+                toAdd = Random.Range(500, 1000);
             }
 
             int directGain = toAdd * (5 * MonthlyDirectGain) / 100;
